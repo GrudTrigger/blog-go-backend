@@ -1,0 +1,9 @@
+services:
+  postgres:
+    container_name: blog_backend
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    ports:
+      - "5432:5432"
