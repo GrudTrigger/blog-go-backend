@@ -1,6 +1,7 @@
 package posts
 
 import (
+	"context"
 	"errors"
 
 	"gorm.io/gorm"
@@ -17,16 +18,16 @@ func NewPostsService(postsRepository *PostsRepository) *PostsService {
 	}
 }
 
-func (service *PostsService) Create(body *PostCreateRequest, user_id uint) (string, error) {
-	res, err := service.PostsRepository.Create(body, user_id)
+func (service *PostsService) Create(body *PostCreateRequest, user_id uint, ctxRedis context.Context) (string, error) {
+	res, err := service.PostsRepository.Create(body, user_id, ctxRedis)
 	if err != nil {
 		return "", err
 	}
 	return res, nil
 }
 
-func (service *PostsService) GetAllPosts() (*[]Post, error) {
-	posts, err := service.PostsRepository.GetAllPosts()
+func (service *PostsService) GetAllPosts(ctxRedis context.Context) (*[]Post, error) {
+	posts, err := service.PostsRepository.GetAllPosts(ctxRedis)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func(service *PostsService) GetPostById(id uint64) (*Post, error) {
 	return post, nil
 }
 
-func (service *PostsService) UploadPost(body *PostUploadRequest, id uint64, user_id uint) (*Post, error) {
+func (service *PostsService) UploadPost(body *PostUploadRequest, id uint64, user_id uint, ctxRedis context.Context) (*Post, error) {
 	isAuthor, err := service.PostsRepository.CheckedAuthor(user_id, id)
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func (service *PostsService) UploadPost(body *PostUploadRequest, id uint64, user
 		Title: body.Title,
 		Content: body.Content,
 		ImageURL: body.ImageURL,
-	})
+	}, ctxRedis)
 
 	if err != nil {
 		return nil, err
@@ -64,7 +65,7 @@ func (service *PostsService) UploadPost(body *PostUploadRequest, id uint64, user
 	return updatePost, nil
 }
 
-func (service *PostsService) Delete(id uint64, user_id uint) (string, error) {
+func (service *PostsService) Delete(id uint64, user_id uint, ctxRedis context.Context) (string, error) {
 	isAuthor, err := service.PostsRepository.CheckedAuthor(user_id, id)
 	if err != nil {
 		return "", err
@@ -73,7 +74,7 @@ func (service *PostsService) Delete(id uint64, user_id uint) (string, error) {
 		return "", errors.New("вы не являетесь автором поста")
 	}
 
-	message, err := service.PostsRepository.Delete(id)
+	message, err := service.PostsRepository.Delete(id, ctxRedis)
 	if err != nil {
 		return "", err
 	}

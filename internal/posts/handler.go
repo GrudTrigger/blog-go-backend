@@ -34,6 +34,8 @@ func NewPostsHandler(router *http.ServeMux, deps PostsHandlerDeps) {
 
 func(handler *PostsHandler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctxRedis := r.Context()
+
 		body, err := request.HandleBody[PostCreateRequest](&w, r)
 		if err != nil {
 			return
@@ -45,7 +47,7 @@ func(handler *PostsHandler) Create() http.HandlerFunc {
 			return
 		}
 
-		result,err := handler.PostsService.Create(body, userData.UserID)
+		result,err := handler.PostsService.Create(body, userData.UserID, ctxRedis)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -57,7 +59,8 @@ func(handler *PostsHandler) Create() http.HandlerFunc {
 
 func (handler *PostsHandler) GetAllPosts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		posts, err := handler.PostsService.GetAllPosts()
+		ctxRedis := r.Context()
+		posts, err := handler.PostsService.GetAllPosts(ctxRedis)
 		if err != nil {
 			http.Error(w, "ошибка при получении постов", http.StatusBadRequest)
 			return
@@ -85,6 +88,9 @@ func (handler *PostsHandler) GetPostById() http.HandlerFunc{
 
 func (handler *PostsHandler) UploadPost() http.HandlerFunc{
 	return func(w http.ResponseWriter, r *http.Request) {
+		
+		ctxRedis := r.Context()
+
 		body, err := request.HandleBody[PostUploadRequest](&w, r)
 		if err != nil {
 			return
@@ -103,7 +109,7 @@ func (handler *PostsHandler) UploadPost() http.HandlerFunc{
 			return
 		}
 
-		uploadPost, err := handler.PostsService.UploadPost(body, id, userData.UserID)
+		uploadPost, err := handler.PostsService.UploadPost(body, id, userData.UserID, ctxRedis)
 		if err != nil {
 			http.Error(w, "ошибка при редактировании поста", http.StatusBadRequest)
 			return
@@ -114,6 +120,8 @@ func (handler *PostsHandler) UploadPost() http.HandlerFunc{
 
 func (handler *PostsHandler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctxRedis := r.Context()
+
 		idString := r.PathValue("id")
 		id, err := strconv.ParseUint(idString, 10, 32)
 		if err != nil {
@@ -125,7 +133,7 @@ func (handler *PostsHandler) Delete() http.HandlerFunc {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
-		message, err := handler.PostsService.Delete(id, userData.UserID)
+		message, err := handler.PostsService.Delete(id, userData.UserID, ctxRedis)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

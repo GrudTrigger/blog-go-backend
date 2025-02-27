@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/blog/internal/comment"
 	"backend/blog/internal/posts"
 	"backend/blog/internal/user"
 	"log"
@@ -27,5 +28,5 @@ func main() {
 		log.Fatalf("Ошибка при удалении таблицы users: %v", err)
 	}
 
-	db.AutoMigrate(&user.User{}, &posts.Post{})
+	db.AutoMigrate(&user.User{}, &posts.Post{}, &comment.CommentPost{})
 }

@@ -6,4 +6,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
     ports:
-      - "5432:5432"
+      - '5432:5432'
+  redis:
+    container_name: blog_redis
+    image: redis:latest
+    ports:
+      - '6379:6379'

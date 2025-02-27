@@ -9,7 +9,7 @@ func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 		fmt.Println(origin)
-		if origin != "http://localhost:8081" {
+		if origin != "http://localhost:3000" {
 			next.ServeHTTP(w, r) // Если origin не совпадает, передаем дальше без CORS
 			return
 		}
